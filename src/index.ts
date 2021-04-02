@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import {createConnection} from "typeorm";
 import {User} from "./entity/User";
+import { Post } from "./entity/Post";
 import express, { Request, Response } from "express";
 
 const app = express();
@@ -61,6 +62,20 @@ app.get("/users/:uuid", async (req: Request, res: Response) => {
     return res.status(200).json({ user });
   } catch (err) {
     return res.status(500).json(err);
+  }
+});
+
+app.post("/posts", async (req: Request, res: Response) => {
+  const { userUuid, title, body } = req.body;
+  try {
+    const user = await User.findOneOrFail({ uuid: userUuid });
+    const post = new Post({ title, body, user });
+    await post.save();
+    return res.status(201).json(post);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Something went wrong", error: err });
   }
 });
 
